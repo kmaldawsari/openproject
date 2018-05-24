@@ -44,6 +44,8 @@ module API
                             v3_path: :user,
                             representer: ::API::V3::Users::UserRepresenter
 
+        cached_representer key_parts: %i[author container]
+
         def self.associated_container_getter
           ->(*) do
             next unless embed_links
@@ -96,9 +98,10 @@ module API
           }
         end
 
-        # visibility of this link is also work_package specific!
+        # TODO: how to check permission for an uncontainered attachable
+        # possibly only do it if there is a container as uncontainered attachables will be deleted automatically
         link :delete,
-             cache_if: -> { represented.deletable?(current_user) } do
+             cache_if: -> { represented.container && represented.deletable?(current_user) } do
           {
             href: api_v3_paths.attachment(represented.id),
             method: :delete
@@ -121,10 +124,9 @@ module API
                    ::API::Decorators::Digest.new(digest, algorithm: 'md5')
                  },
                  render_nil: true
-        property :created_on,
-                 as: 'createdAt',
+        property :created_at,
                  exec_context: :decorator,
-                 getter: ->(*) { datetime_formatter.format_datetime(represented.created_on) }
+                 getter: ->(*) { datetime_formatter.format_datetime(represented.created_at) }
 
         def _type
           'Attachment'

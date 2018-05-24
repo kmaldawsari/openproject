@@ -46,7 +46,7 @@ module API
           end
 
           get &API::V3::Attachments::AttachmentsByContainerAPI.read
-          post &API::V3::Attachments::AttachmentsByContainerAPI.create(%i[edit_work_packages add_work_packages])
+          post &API::V3::Attachments::AttachmentsByContainerAPI.create
         end
       end
     end

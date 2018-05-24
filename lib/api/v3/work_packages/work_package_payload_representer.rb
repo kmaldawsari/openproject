@@ -43,6 +43,25 @@ module API
         def load_complete_model(model)
           model
         end
+
+        property :attachments,
+                 exec_context: :decorator,
+                 getter: ->(*) {},
+                 setter: ->(fragment:, **) do
+                   ids = fragment.map do |link|
+                     ::API::Utilities::ResourceLinkParser.parse_id link['href'],
+                                                                   property: :attachment,
+                                                                   expected_version: '3',
+                                                                   expected_namespace: :attachments
+                   end
+
+                   represented.unsaved_attachments = Attachment.find(ids)
+
+                   ids
+                 end,
+                 skip_render: ->(*) { true },
+                 linked_resource: true,
+                 uncacheable: true
       end
     end
   end

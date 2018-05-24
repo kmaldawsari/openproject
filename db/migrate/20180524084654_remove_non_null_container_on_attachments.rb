@@ -1,3 +1,5 @@
+#-- encoding: UTF-8
+
 #-- copyright
 # OpenProject is a project management system.
 # Copyright (C) 2012-2018 the OpenProject Foundation (OPF)
@@ -26,27 +28,25 @@
 # See docs/COPYRIGHT.rdoc for more details.
 #++
 
-module API
-  module V3
-    module Attachments
-      class AttachmentsByPostAPI < ::API::OpenProjectAPI
-        resources :attachments do
-          helpers API::V3::Attachments::AttachmentsByContainerAPI::Helpers
+class RemoveNonNullContainerOnAttachments < ActiveRecord::Migration[5.1]
+  def change
+    change_column_null :attachments, :container_id, true
+    change_column_null :attachments, :container_type, true
 
-          helpers do
-            def container
-              post
-            end
+    change_column_default :attachments, :container_id, from: 0, to: nil
+    change_column_default :attachments, :container_type, from: '', to: nil
 
-            def get_attachment_self_path
-              api_v3_paths.attachments_by_post(container.id)
-            end
-          end
+    change_column_null :attachment_journals, :container_id, true
+    change_column_null :attachment_journals, :container_type, true
 
-          get &API::V3::Attachments::AttachmentsByContainerAPI.read
-          post &API::V3::Attachments::AttachmentsByContainerAPI.create
-        end
-      end
+    change_column_default :attachment_journals, :container_id, from: 0, to: nil
+    change_column_default :attachment_journals, :container_type, from: '', to: nil
+
+    add_column :attachments, :updated_at, :datetime
+    rename_column :attachments, :created_on, :created_at
+
+    reversible do |change|
+      change.up { Attachment.update_all("updated_at = created_at") }
     end
   end
 end

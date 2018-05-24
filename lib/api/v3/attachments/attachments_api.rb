@@ -42,8 +42,7 @@ module API
           end
 
           post do
-            # TODO: get real permissions preferably via acts_as_attachable
-            authorize_any %i[add_work_packages edit_wiki_pages], global: true
+            raise API::Errors::Unauthorized if Redmine::Acts::Attachable.attachables.none?(&:attachments_addable?)
 
             ::API::V3::Attachments::AttachmentRepresenter.new(parse_and_create,
                                                               current_user: current_user)

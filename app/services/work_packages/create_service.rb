@@ -54,7 +54,7 @@ class WorkPackages::CreateService
   def create(attributes, work_package)
     result = set_attributes(attributes, work_package)
 
-    result.success &&= work_package.save
+    result.success &&= work_package.save && (work_package.attachments = work_package.unsaved_attachments)
 
     if result.success?
       result.merge!(reschedule_related(work_package))

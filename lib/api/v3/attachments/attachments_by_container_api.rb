@@ -106,9 +106,9 @@ module API
           end
         end
 
-        def self.create(permissions)
+        def self.create
           -> do
-            authorize_any permissions, projects: container.project
+            raise API::Errors::Unauthorized unless container.attachments_addable?(current_user)
 
             ::API::V3::Attachments::AttachmentRepresenter.new(parse_and_create,
                                                               current_user: current_user)
