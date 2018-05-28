@@ -54,7 +54,9 @@ class WorkPackages::UpdateService
     result = set_attributes(attributes)
 
     if result.success?
-      work_package.attachments = work_package.unsaved_attachments
+      # TODO: use a saving mechanism that creates/removes attachments along with the
+      # work package itself
+    #  work_package.attachments = work_package.unsaved_attachments
       result.merge!(update_dependent)
     end
 

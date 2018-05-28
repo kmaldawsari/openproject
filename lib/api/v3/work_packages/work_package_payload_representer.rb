@@ -55,13 +55,15 @@ module API
                                                                    expected_namespace: :attachments
                    end
 
-                   represented.unsaved_attachments = Attachment.find(ids)
-
-                   ids
+                   represented.attachment_ids = ids
                  end,
                  skip_render: ->(*) { true },
                  linked_resource: true,
                  uncacheable: true
+
+        def load_complete_model(model)
+          model
+        end
       end
     end
   end

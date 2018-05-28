@@ -26,57 +26,47 @@
 # See docs/COPYRIGHT.rdoc for more details.
 #++
 
-require 'work_packages/base_contract'
 require 'api/v3/work_packages/work_package_payload_representer'
 
 module API
   module V3
     module WorkPackages
-      module WorkPackagesSharedHelpers
+      module FormHelper
         extend Grape::API::Helpers
 
-        def work_package_representer(work_package = @work_package)
-          ::API::V3::WorkPackages::WorkPackageRepresenter.create(
-            work_package,
-            current_user: current_user,
-            embed_links: true
-          )
-        end
+        def respond_with_work_package_form(work_package, contract_class:, form_class:, action: :update)
+          parameters = parse_body(work_package)
 
-        def handle_work_package_errors(work_package, result)
-          errors = result.errors
-          errors = merge_dependent_errors work_package, result if errors.empty?
+          result = ::WorkPackages::SetAttributesService
+                   .new(user: current_user, work_package: work_package, contract: contract_class)
+                   .call(parameters)
 
-          api_errors = [::API::Errors::ErrorBase.create_and_merge_errors(errors)]
+          api_errors = ::API::Errors::ErrorBase.create_errors(result.errors)
 
-          fail ::API::Errors::MultipleErrors.create_if_many(api_errors)
+          # errors for invalid data (e.g. validation errors) are handled inside the form
+          if only_validation_errors(api_errors)
+            status 200
+            form_class.new(work_package,
+                           current_user: current_user,
+                           errors: api_errors,
+                           action: action)
+          else
+            fail ::API::Errors::MultipleErrors.create_if_many(api_errors)
+          end
         end
 
         private
 
-        def merge_dependent_errors(work_package, result)
-          errors = ActiveModel::Errors.new work_package
-
-          result.dependent_results.each do |dr|
-            dr.errors.keys.each do |field|
-              dr.errors.symbols_and_messages_for(field).each do |symbol, full_message, _|
-                dependent_error = I18n.t(
-                  :error_dependent_work_package,
-                  related_id: dr.result.id,
-                  related_subject: dr.result.subject,
-                  error: full_message
-                )
-
-                errors.add :base, symbol, message: dependent_error
-              end
-            end
-          end
-
-          errors
+        def only_validation_errors(errors)
+          errors.all? { |error| error.code == 422 }
         end
 
-        def notify_according_to_params
-          params[:notify] != 'false'
+        def parse_body(work_package)
+          ::API::V3::WorkPackages::ParseParamsService
+            .new(current_user)
+            .call(request_body,
+                  project: work_package.project,
+                  type: work_package.type)
         end
       end
     end

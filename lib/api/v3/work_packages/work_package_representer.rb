@@ -42,7 +42,7 @@ module API
         def initialize(model, current_user:, embed_links: false)
           model = load_complete_model(model)
 
-          super(model, current_user: current_user, embed_links: embed_links)
+          super
         end
 
         self_link title_getter: ->(*) { represented.subject }

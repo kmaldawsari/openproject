@@ -32,6 +32,7 @@ require 'model_contract'
 
 module WorkPackages
   class BaseContract < ::ModelContract
+    # TODO: ensure that only unclaimed attachments by the current_user are assigned
     def self.model
       WorkPackage
     end

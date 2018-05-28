@@ -82,7 +82,7 @@ module API
         link :createWorkPackage do
           next unless current_user_allowed_to_add_work_packages?
           {
-            href: api_v3_paths.create_work_package_form,
+            href: api_v3_paths.respond_with_work_package_form,
             method: :post
           }
         end
