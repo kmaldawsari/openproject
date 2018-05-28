@@ -120,6 +120,8 @@ module WorkPackages
     validate :validate_category
     validate :validate_estimated_hours
 
+    validate :validate_attachments_replacements
+
     def initialize(work_package, user)
       super(work_package)
 
@@ -282,6 +284,13 @@ module WorkPackages
         query.where.not(hierarchy: 1, from_id: old_parent_id, to_id: model.id)
       else
         query
+      end
+    end
+
+    def validate_attachments_replacements
+      model.attachments_replacements and model.attachments_replacements.each do |attachment|
+        errors.add :attachments, :unchangeable if attachment.container && attachment.container != model
+        errors.add :attachments, :does_not_exist if !attachment.container && attachment.author != user
       end
     end
   end
