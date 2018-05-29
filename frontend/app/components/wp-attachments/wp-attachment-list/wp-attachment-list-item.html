@@ -10,14 +10,13 @@
       <authoring class="work-package--attachments--info"
                  [createdOn]="attachment.createdAt"
                  [author]="attachment.author"
-                 [showAuthorAsLink]="false"
-                 *ngIf="!workPackage.isNew"></authoring>
+                 [showAuthorAsLink]="false"></authoring>
     </a>
   </span>
   <a
       href=""
       class="form--selected-value--remover work-package--atachments--delete-button"
-      *ngIf="!!attachment.$links.delete || workPackage.isNew"
+      *ngIf="!!attachment.$links.delete"
       (click)="confirmRemoveAttachment($event)">
     <op-icon icon-classes="icon-delete"
              [icon-title]="text.removeFile({fileName: attachment.fileName})"></op-icon>

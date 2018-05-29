@@ -43,7 +43,7 @@ export class WorkPackageAttachmentListItemComponent {
   public text = {
     destroyConfirmation: this.I18n.t('js.text_attachment_destroy_confirmation'),
     removeFile: (arg:any) => this.I18n.t('js.label_remove_file', arg)
-  }
+  };
 
   constructor(protected wpNotificationsService:WorkPackageNotificationService,
               @Inject(I18nToken) readonly I18n:op.I18n) {
