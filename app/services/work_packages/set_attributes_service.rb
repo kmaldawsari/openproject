@@ -62,9 +62,6 @@ class WorkPackages::SetAttributesService
     if attributes.key?(:attachment_ids)
       work_package.attachments_replacements = Attachment.where(id: attributes[:attachment_ids])
     end
-    #attachment_attributes = attributes.slice(:attachment_ids)
-    #primary_attributes = attributes.except(:attachment_ids)
-    #work_package.attributes = primary_attributes
     work_package.attributes = attributes.except(:attachment_ids)
 
     set_default_attributes
