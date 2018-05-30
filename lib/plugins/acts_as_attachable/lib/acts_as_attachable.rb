@@ -48,7 +48,6 @@ module Redmine
             order(attachments_order)
           }, options.reverse_merge!(as: :container, dependent: :destroy)
 
-
           attr_accessor :attachments_replacements
           # TODO: check if unsaved_attachments can be removed
           attr_accessor :unsaved_attachments
@@ -88,20 +87,12 @@ module Redmine
           @unsaved_attachments ||= []
         end
 
-        #def attachments_replacements
-        #  @attachments_replacements
-        #end
-
-        #def attachments_replacements=(replacements)
-        #  @attachments_replacements = replacements
-        #end
-
         # Bulk attaches a set of files to an object
         def attach_files(attachments)
           if attachments && attachments.is_a?(Hash)
             attachments.each_value do |attachment|
               file = attachment['file']
-              next unless file && !file.empty?
+              next if file && file.size == 0
               self.attachments.build(file: file,
                                      container: self,
                                      description: attachment['description'].to_s.strip,

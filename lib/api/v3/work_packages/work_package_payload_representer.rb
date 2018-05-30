@@ -40,10 +40,6 @@ module API
           super + %w[date attachments]
         end
 
-        def load_complete_model(model)
-          model
-        end
-
         property :attachments,
                  exec_context: :decorator,
                  getter: ->(*) {},

@@ -80,7 +80,7 @@ class MessagesController < ApplicationController
     @message.attach_files(permitted_params.attachments.to_h)
 
     if @message.save
-      render_attachment_warning_if_needed(@reply)
+      render_attachment_warning_if_needed(@message)
       call_hook(:controller_messages_new_after_save, params: params, message: @message)
 
       redirect_to topic_path(@message)

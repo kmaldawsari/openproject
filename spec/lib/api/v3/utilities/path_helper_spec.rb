@@ -173,7 +173,7 @@ describe ::API::V3::Utilities::PathHelper do
   end
 
   describe '#create_work_package_form' do
-    subject { helper.respond_with_work_package_form }
+    subject { helper.create_work_package_form }
 
     it_behaves_like 'api v3 path', '/work_packages/form'
   end
