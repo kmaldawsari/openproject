@@ -52,36 +52,49 @@ module API
           # to also parse custom fields successfully
           # TODO: create a representer class with all available custom fields, keep it between requests
           # and use it for parsing
-          initial_custom_fields = custom_fields_for(project, type, {})
+          initial_struct = ParsingStruct.new(project, type, {})
 
-          hash = parse_attributes_with_representer(request_body, initial_custom_fields)
+          hash = parse_attributes_with_representer(request_body, initial_struct)
 
-          new_custom_fields = custom_fields_for(project, type, hash)
+          updated_struct = ParsingStruct.new(project, type, hash)
 
-          if initial_custom_fields != new_custom_fields
-            hash = parse_attributes_with_representer(request_body, new_custom_fields)
+          if initial_struct.available_custom_fields != updated_struct.available_custom_fields
+            hash = parse_attributes_with_representer(request_body, updated_struct)
           end
 
           hash
         end
 
-        def parse_attributes_with_representer(hash, custom_fields)
-          struct = OpenStruct.new available_custom_fields: custom_fields
+        def parse_attributes_with_representer(hash, struct)
           klass = ::API::V3::WorkPackages::WorkPackagePayloadRepresenter.create_class(struct)
 
           klass
             .new(struct, current_user: current_user)
             .from_hash(Hash(hash))
             .to_h
-            .except(:available_custom_fields)
             .reverse_merge(lock_version: nil)
         end
 
-        def custom_fields_for(project, type, hash)
-          project = hash[:project_id] ? Project.find_by(id: hash[:project_id]) : project
-          type = hash[:type_id] ? Type.find_by(id: hash[:type_id]) : type
+        class ParsingStruct < OpenStruct
+          def initialize(project, type, hash)
+            super()
 
-          ::WorkPackage::AvailableCustomFields.for(project, type)
+            send(:available_custom_fields=, custom_fields_for(project, type, hash))
+            send(:'milestone?=', type.is_milestone?)
+          end
+
+          def custom_fields_for(project, type, hash)
+            project = hash[:project_id] ? Project.find_by(id: hash[:project_id]) : project
+            type = hash[:type_id] ? Type.find_by(id: hash[:type_id]) : type
+
+            ::WorkPackage::AvailableCustomFields.for(project, type)
+          end
+
+          def to_h
+            super
+              .except(:available_custom_fields,
+                      :milestone?)
+          end
         end
       end
     end
